@@ -10,20 +10,18 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-
     <ion-content :fullscreen="true">
       <ion-header class="ion-no-border ion-padding-top ion-padding-horizontal">
         <ion-grid>
           <ion-row>
             <ion-col>
-              <div class="ion-text-start" id="score">
-                Clicks per Second: {{ cpsResult.toFixed(2) }}
-              </div>
-            </ion-col>
-            <ion-col>
               <div class="ion-text-end">
                 Time Left: {{ temporitzador }}
                 Counter: {{ comptador }}
+              </div>
+              <div class="ion-text-center">
+                CPS: {{ clicksPerSecond }}<br>
+                Peak CPS: {{ peakCPS }}
               </div>
             </ion-col>
           </ion-row>
@@ -53,7 +51,7 @@ export default defineComponent({
   setup() {
     return {
       infoIcon: informationCircleOutline,
-      buttonDisabled: false,
+      buttonDisabled: false
     }
   },
   data() {
@@ -61,10 +59,12 @@ export default defineComponent({
       comptador: 0,
       temporitzador: INITIAL_TIME,
       funciona: false,
-      cpsResult: 0,
+      clicksPerSecond: 0,
+      peakCPS: 0,
       countdownTimer: null,
       clickCountTimer: null,
-      updateUITimer: null
+      lastSecondClics: 0,
+      currentSecondClics: 0
     }
   },
   watch: {
@@ -80,12 +80,6 @@ export default defineComponent({
     }
   },
   methods: {
-    updateCPS() {
-      if (this.temporitzador <= 0) {
-        this.cpsResult = this.comptador / INITIAL_TIME;
-        this.cpsResult = parseFloat(this.cpsResult.toFixed(2));
-      }
-    },
     async InfoPopup() {
       const alert = await alertController.create({
         header: 'App Comptador',
@@ -102,15 +96,26 @@ export default defineComponent({
     startGame() {
       this.reset();
       this.funciona = true;
-      this.countdownTimer = setInterval(() => { if (this.temporitzador > 0) this.temporitzador--; else this.endGame(); }, 1000);
+      this.countdownTimer = setInterval(() => {
+        if (this.temporitzador > 0) this.temporitzador--; else this.endGame();
+      }, 1000);
 
-      this.clickCountTimer = setInterval(() => { /* Add anything needed every second */ }, 1000);
+      // Reiniciamos los contadores de CPS y Peak CPS
+      this.clicksPerSecond = 0;
+      this.peakCPS = 0;
 
-      this.updateUITimer = setInterval(() => { if (this.temporitzador <= 0) clearInterval(this.updateUITimer); }, 100);
+      // Configuramos el temporizador para calcular CPS y Peak CPS
+      this.clickCountTimer = setInterval(() => {
+        this.clicksPerSecond = this.currentSecondClics;
+        if (this.currentSecondClics > this.peakCPS) {
+          this.peakCPS = this.currentSecondClics;
+        }
+        this.currentSecondClics = 0; // Reiniciamos los clics por segundo para el próximo segundo
+      }, 1000);
     },
     increment() {
       this.comptador++;
-      this.updateCPS();
+      this.currentSecondClics++;
     },
     endGame() {
       clearInterval(this.countdownTimer);
@@ -123,14 +128,10 @@ export default defineComponent({
     reset() {
       clearInterval(this.countdownTimer);
       clearInterval(this.clickCountTimer);
-      clearInterval(this.updateUITimer);
 
       this.comptador = 0;
       this.temporitzador = INITIAL_TIME;
       this.funciona = false;
-    },
-    init() {
-      this.clickCountTimer = setInterval(() => { /* Add anything needed every second */ }, 1000);
     },
     async Resultat() {
       const message = `Game Over! Counter: ${this.comptador}`;
