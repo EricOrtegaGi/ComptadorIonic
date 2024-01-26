@@ -84,7 +84,7 @@ export default defineComponent({
       const alert = await alertController.create({
         header: 'App Comptador',
         subHeader: 'Creado por Eric Ortega Gisbert',
-        message: 'Puedes encontrar el código fuente en: <a href="https://github.com/EricOrtegaGi/Ionic">GitHub</a>',
+        message: 'Puedes encontrar el código fuente en: <a href="https://github.com/EricOrtegaGi/ComptadorIonic">https://github.com/EricOrtegaGi/ComptadorIonic</a>',
         buttons: ['OK'],
       });
       await alert.present();
