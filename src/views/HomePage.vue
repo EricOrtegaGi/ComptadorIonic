@@ -29,7 +29,7 @@
       </ion-header>
 
       <div id="container">
-        <ion-button @click="Boto" :disabled="buttonDisabled">
+        <ion-button id="Tap" @click="Boto" :disabled="buttonDisabled">
           {{ funciona ? '¡CLICK!' : 'Start Game' }}
         </ion-button>
       </div>
@@ -38,7 +38,19 @@
 </template>
 
 <script>
-import { alertController, IonButton, IonContent, IonGrid, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar, toastController } from '@ionic/vue';
+import {
+  alertController,
+  createAnimation,
+  IonButton,
+  IonContent,
+  IonGrid,
+  IonHeader,
+  IonIcon,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  toastController
+} from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { informationCircleOutline } from "ionicons/icons";
 
@@ -80,12 +92,27 @@ export default defineComponent({
     }
   },
   methods: {
+    bounce () {
+      const animation = createAnimation("Tap")
+      animation.addElement(document.getElementById('Boto'))
+          .duration(1000)
+          .fromTo('transform', 'scale(2.0)', 'scale(1.0)')
+      animation.play();
+    },
+    blink () {
+      const animation = createAnimation("Tap")
+      animation.addElement(document.getElementById('Boto'))
+          .duration(500)
+          .fromTo('opacity', '0', '1')
+      animation.play();
+    },
     async InfoPopup() {
-      const alert = await alertController.create({
-        header: 'App Comptador',
-        subHeader: 'Creado por Eric Ortega Gisbert',
-        message: 'Puedes encontrar el código fuente en: <a href="https://github.com/EricOrtegaGi/ComptadorIonic">https://github.com/EricOrtegaGi/ComptadorIonic</a>',
-        buttons: ['OK'],
+      const alert = await alertController
+          .create({
+            header: 'App Comptador',
+            subHeader: 'Creado por Eric Ortega Gisbert',
+            message: 'Puedes encontrar el código fuente en: <a href="https://github.com/EricOrtegaGi/ComptadorIonic"> Repo </a>',
+            buttons: ['OK'],
       });
       await alert.present();
     },
@@ -114,6 +141,8 @@ export default defineComponent({
       }, 1000);
     },
     increment() {
+      this.bounce();
+      this.blink();
       this.comptador++;
       this.currentSecondClics++;
     },
